@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install light test dependency
+        run: pip install pytest
+      - name: Syntax check
+        run: python -m compileall -q src
+      - name: Run light tests
+        run: pytest -q
+      - name: Run dependency-free audit experiments
+        run: PYTHONPATH=src python src/audit_experiments.py

@@ -1,0 +1,24 @@
+{
+  "chunk_stress": {
+    "max_chunks_observed": 109,
+    "token_budget_violations": 0,
+    "worlds": 500
+  },
+  "hierarchy": {
+    "final_words": 11,
+    "leaf_chunks": 65,
+    "passes": 4,
+    "source_words": 2500
+  },
+  "metrics": {
+    "reversed_tokens_rouge1_f": 1.0,
+    "reversed_tokens_rougeL_f": 0.25,
+    "wer_example": {
+      "deletions": 0,
+      "insertions": 1,
+      "substitutions": 1,
+      "wer": 0.5
+    }
+  },
+  "note": "Pure algorithm/metric audit; no Whisper or summarisation model was run."
+}
