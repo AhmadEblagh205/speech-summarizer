@@ -73,3 +73,24 @@ These are implementation checks only. They must never be presented as Whisper or
 ## 8. Model-performance release condition
 
 Before a WER/ROUGE headline can be published, the repository should contain or document a fixed evaluation set with human references, fixed model versions/configurations, hardware/runtime metadata and a reproducible command that regenerates the result.
+
+## Notes moved from the README
+
+The old design treated roughly 700 words as a safe chunk for a transformer summariser. Model context windows are measured in tokens, so a 700-word chunk can map to very different token counts depending on language and vocabulary. Version 0.3 changed the following:
+
+- chunks are built against the summariser tokenizer and the declared model input window;
+- sentence boundaries are kept where possible, with word-level splitting only for an oversized sentence;
+- an input that cannot fit raises an error instead of being truncated;
+- map-reduce summarisation repeats until the joined summary fits one model-safe chunk, and aborts if the summariser does not reduce the text enough to converge;
+- each run is written to its own directory instead of overwriting transcript.txt and summary.txt, with the transcription backend and summary-model configuration recorded;
+- the backend is chosen explicitly and never switched silently after a runtime failure;
+- WER is split into substitution, deletion and insertion counts, with a corpus-level WER (total edits over total reference words);
+- ROUGE-1 and ROUGE-L report precision, recall and F1 with the normalisation stated.
+
+Pipeline: audio, Whisper backend (faster-whisper preferred, openai-whisper optional), transcript and metadata, tokenizer-aware sentence-preserving chunker, chunk summaries, repeated reduction while the joined summaries exceed the model window, final summary and run metadata. `--text` skips transcription.
+
+Chunk stress test: 500 random long-document cases with a variable pseudo-subword tokenizer gave zero token-budget violations. It tests the software, not summary quality. The hierarchy case starts with 2,500 words, makes 65 first-pass chunks and reaches one safe result in four passes, using a fake compressor that only tests control flow.
+
+ROUGE example: reference "alpha beta gamma delta" against summary "delta gamma beta alpha" gives ROUGE-1 F1 of 1.00 and ROUGE-L F1 of 0.25, because word order is lost. ROUGE does not measure factual consistency. WER values from another toolkit are comparable only if its normalisation matches.
+
+Not yet measured: Whisper WER on this application, DistilBART ROUGE on lecture summaries, factuality, real-time throughput, and faster-whisper against openai-whisper. A comparison needs a held-out set of lecture clips with human reference transcripts and summaries, fixed model versions and decoding settings, and repeated timings on named hardware.
